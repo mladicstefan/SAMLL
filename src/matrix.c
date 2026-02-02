@@ -132,33 +132,33 @@ matrix_t *mat_transpose(matrix_t *m)
     {
         for (u32 j = 0; j < m->cols; j++)
         {
-            t->data[i * t->cols + j] = m->data[j * m->cols + i];
+            t->data[j * t->cols + i] = m->data[i * m->cols + j];
         }
     }
     return t;
 }
 
+/*
+ * Cache-optimized mat mult using blocking
+ * Instead of iterating through entire rows/columns, process 32x32 blocks
+ * at a time. This keeps the working data in L1 cache , dramatically
+ * reducing cache misses
+ * */
 matrix_t *mat_mult(matrix_t *a, matrix_t *b)
 {
     matrix_t *res = mat_init(a->rows, b->cols);
 
     const u32 BLOCK = 32;
 
-    /*
-     * Cache-optimized mat mult using blocking
-     * Instead of iterating through entire rows/columns, process 32x32 blocks
-     * at a time. This keeps the working data in L1 cache , dramatically
-     * reducing cache misses
-     * */
     for (u32 ii = 0; ii < a->rows; ii += BLOCK)
     {
-        for (u32 jj = 0; jj < a->cols; jj += BLOCK)
+        for (u32 jj = 0; jj < b->cols; jj += BLOCK)
         {
-            for (u32 kk = 0; kk < a->rows; kk += BLOCK)
+            for (u32 kk = 0; kk < a->cols; kk += BLOCK)
             {
                 u32 i_end = (ii + BLOCK < a->rows) ? ii + BLOCK : a->rows;
-                u32 j_end = (jj + BLOCK < a->rows) ? jj + BLOCK : a->cols;
-                u32 k_end = (kk + BLOCK < a->rows) ? kk + BLOCK : a->cols;
+                u32 j_end = (jj + BLOCK < b->cols) ? jj + BLOCK : b->cols;
+                u32 k_end = (kk + BLOCK < a->cols) ? kk + BLOCK : a->cols;
 
                 for (u32 i = ii; i < i_end; i++)
                 {

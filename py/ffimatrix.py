@@ -23,7 +23,7 @@ lib = ffi.dlopen("../shared/libmatrix.so")
 
 
 class Matrix:
-    __slots__ = ("_ptr",)
+    __slots__ = ("_ptr", "__weakref__")
 
     def __init__(self, rows, cols, data=None):
         self._ptr = lib.mat_init(rows, cols)
