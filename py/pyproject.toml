@@ -1,0 +1,7 @@
+[project]
+name = "SAMLL"
+version = "0.1.0"
+description = "Shitty Ass Machine Learning Library"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = []
