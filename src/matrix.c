@@ -1,4 +1,5 @@
 #include "matrix.h"
+#include "include/random.h"
 #include "include/synclog.h"
 #include "include/types.h"
 
@@ -96,6 +97,20 @@ void mat_scalar_mult(matrix_t *m, f64 k)
         m->data[i] *= k;
 }
 
+void matrix_fill_rand(matrix_t *m)
+{
+    if (!m)
+    {
+        LOG_DBG("NULL PTR EXCEPTION: %p", (void *)m);
+        return;
+    }
+
+    for (u32 i = 0; i < m->rows * m->cols; i++)
+    {
+        m->data[i] += random_f64();
+    }
+}
+
 matrix_t *mat_transpose(matrix_t *m)
 {
     if (!m)
@@ -174,29 +189,29 @@ matrix_t *mat_mult(matrix_t *a, matrix_t *b)
 //     return elapsed / runs;
 // }
 
-int main()
-{
-    u8 rows = 4, cols = 4;
-    matrix_t *a = mat_init(rows, cols);
-
-    for (u32 i = 0; i < rows * cols; i++)
-        a->data[i] = i;
-    matrix_t *b = mat_init(rows, cols);
-
-    for (u32 i = 0; i < rows * cols; i++)
-        b->data[i] = i;
-    matrix_t *res = mat_add(a, b);
-
-    DBG_PRINT_MATRIX(res);
-    matrix_t *t = mat_transpose(res);
-    DBG_PRINT_MATRIX(t);
-    matrix_t *mul = mat_mult(a, b);
-    DBG_PRINT_MATRIX(mul);
-
-    mat_destroy(mul);
-    mat_destroy(a);
-    mat_destroy(b);
-    mat_destroy(res);
-    mat_destroy(t);
-    return 0;
-}
+// int main()
+// {
+//     u8 rows = 4, cols = 4;
+//     matrix_t *a = mat_init(rows, cols);
+//
+//     for (u32 i = 0; i < rows * cols; i++)
+//         a->data[i] = i;
+//     matrix_t *b = mat_init(rows, cols);
+//
+//     for (u32 i = 0; i < rows * cols; i++)
+//         b->data[i] = i;
+//     matrix_t *res = mat_add(a, b);
+//
+//     DBG_PRINT_MATRIX(res);
+//     matrix_t *t = mat_transpose(res);
+//     DBG_PRINT_MATRIX(t);
+//     matrix_t *mul = mat_mult(a, b);
+//     DBG_PRINT_MATRIX(mul);
+//
+//     mat_destroy(mul);
+//     mat_destroy(a);
+//     mat_destroy(b);
+//     mat_destroy(res);
+//     mat_destroy(t);
+//     return 0;
+// }

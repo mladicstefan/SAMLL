@@ -1,6 +1,6 @@
 #pragma once
 #include "include/types.h"
-#include "matrix.h"
+#include "matrix.c"
 
 typedef struct
 {
@@ -14,7 +14,7 @@ typedef struct
 
 void network_print(const network_t *nn);
 
-network_t *network_create(u32 *sizes, u32 num_layers);
+network_t *network_create(const u32 *sizes, const u32 num_layers);
 void network_randomize_weights(network_t *nn);
 void network_destroy(network_t *nn);
 
