@@ -63,7 +63,7 @@ matrix_t *mat_add(matrix_t *a, matrix_t *b)
     return res;
 }
 
-matrix_t *mat_sub(matrix_t *a, matrix_t *b)
+matrix_t *mat_sub(const matrix_t *a, const matrix_t *b)
 {
     if (a->cols != b->cols || a->rows != b->rows)
     {

@@ -12,7 +12,7 @@ typedef struct
     u32 num_samples;
 } dataset_t;
 
-static dataset_t *dataset_create(u32 num_samples);
+dataset_t *dataset_create(u32 num_samples);
 dataset_t *parse_file(char *path);
 void dataset_destroy(dataset_t *data);
 void dataset_print(const dataset_t *data);

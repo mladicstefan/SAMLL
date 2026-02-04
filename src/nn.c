@@ -1,8 +1,8 @@
 #include "nn.h"
 #include "activations.h"
-#include "dataset.h"
 #include "include/random.h"
 #include "include/synclog.h"
+#include <memory.h>
 #include <stdlib.h>
 
 matrix_t *mat_sigmoid(matrix_t *m)
@@ -141,19 +141,67 @@ void forward(network_t *nn)
 {
     for (u32 i = 0; i < nn->num_layers - 1; i++)
     {
-        nn->z[i + 1] =
-            mat_add(mat_mult(nn->weights[i], nn->a[i]), nn->biases[i]);
-        nn->a[i + 1] = (i == nn->num_layers - 2) ? mat_sigmoid(nn->z[i + 1])
-                                                 : mat_reLU(nn->z[i + 1]);
+        matrix_t *mult_result = mat_mult(nn->weights[i], nn->a[i]);
+        matrix_t *new_z = mat_add(mult_result, nn->biases[i]);
+        mat_destroy(mult_result);
+
+        mat_destroy(nn->z[i + 1]);
+        nn->z[i + 1] = new_z;
+
+        matrix_t *new_a = (i == nn->num_layers - 2) ? mat_sigmoid(nn->z[i + 1])
+                                                    : mat_reLU(nn->z[i + 1]);
+        mat_destroy(nn->a[i + 1]);
+        nn->a[i + 1] = new_a;
     }
 }
-void backward(network_t *nn, const matrix_t *expected);
-void update_weights(network_t *nn, const f64 LEARNING_RATE);
 
-void train(network_t *nn, matrix_t **inputs, matrix_t **labels,
-           const u32 num_samples, u32 epochs, const f64 LEARNING_RATE);
+void backward(network_t *nn, const matrix_t *expected)
+{
+    (void)nn;
+    (void)expected;
+    // TODO: implement
+}
 
-u32 predict(network_t *nn, const matrix_t *input);
+void update_weights(network_t *nn, const f64 LEARNING_RATE)
+{
+    (void)nn;
+    (void)LEARNING_RATE;
+    // TODO: implement
+}
+
+void train(network_t *nn, dataset_t *data, const u32 num_samples, u32 epochs,
+           const f64 LEARNING_RATE)
+{
+
+    for (u64 epoch = 0; epoch < epochs; epoch++)
+    {
+        f64 total_loss = 0.0;
+        for (u32 i = 0; i < num_samples; i++)
+        {
+            u32 size = nn->a[0]->rows * nn->a[0]->cols * sizeof(f64);
+            memcpy(nn->a[0]->data, data->inputs[i]->data, size);
+            forward(nn);
+
+            total_loss += MSE_loss(nn->a[nn->num_layers - 1], data->labels[i]);
+
+            backward(nn, data->labels[i]);
+            update_weights(nn, LEARNING_RATE);
+        }
+
+        if (epoch % 10 == 0)
+        {
+            LOG_DBG("Epoch %lu: Avg Loss = %.6f", epoch,
+                    total_loss / num_samples);
+        }
+    }
+}
+
+u32 predict(network_t *nn, const matrix_t *input)
+{
+    (void)nn;
+    (void)input;
+    return 0;
+}
 
 // MSE = (1/n) Σ(predicted - expected)²
 f64 MSE_loss(const matrix_t *predicted, const matrix_t *expected)
@@ -163,11 +211,17 @@ f64 MSE_loss(const matrix_t *predicted, const matrix_t *expected)
         LOG_DBG("Invalid inputs: %p %p", (void *)predicted, (void *)expected);
         return -1;
     }
-    f64 res = 0;
-    // for (u32 i = 0; i; inc-expression) {
-    //
-    // }
-    return res;
+    f64 loss = 0;
+
+    matrix_t *res = mat_sub(predicted, expected);
+    for (u32 i = 0; i < res->rows * res->cols; i++)
+    {
+        res->data[i] = pow(res->data[i], 2);
+        loss += res->data[i];
+    }
+    u32 n = res->rows * res->cols;
+    mat_destroy(res);
+    return loss / n;
 }
 
 int main()
@@ -177,9 +231,9 @@ int main()
     const u32 NUM_LAYERS = 3;
     network_t *nn = network_create(SIZES, NUM_LAYERS);
     network_print(nn);
-    dataset_t *data = parse_file("../data/iris/bezdekIris.data");
-    dataset_print(data);
-
+    dataset_t *data = parse_file("../data/iris/iris.data");
+    // dataset_print(data);
+    train(nn, data, 150, 10000, 0.5);
     dataset_destroy(data);
     network_destroy(nn);
     return 0;

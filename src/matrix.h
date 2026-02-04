@@ -17,7 +17,7 @@ void mat_destroy(matrix_t *m);
 void matrix_fill_rand(matrix_t *m);
 
 matrix_t *mat_add(matrix_t *a, matrix_t *b);
-matrix_t *mat_sub(matrix_t *a, matrix_t *b);
+matrix_t *mat_sub(const matrix_t *a, const matrix_t *b);
 matrix_t *mat_mult(matrix_t *a, matrix_t *b);
 void mat_scalar_mult(matrix_t *a, f64 k);
 

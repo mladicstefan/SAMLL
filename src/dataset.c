@@ -7,7 +7,7 @@
 static const u8 BUF_LEN = 255;
 static const u8 NUM_FEATURES = 4;
 
-static dataset_t *dataset_create(u32 num_samples)
+dataset_t *dataset_create(u32 num_samples)
 {
     dataset_t *dataset = malloc(sizeof(dataset_t));
     dataset->inputs = calloc(num_samples, sizeof(matrix_t *));
@@ -41,6 +41,11 @@ dataset_t *parse_file(char *path)
         }
         dataset->labels[idx] = mat_init(3, 1);
         char *label = strtok(NULL, "\n");
+        if (!label)
+        {
+            LOG_DBG("Failed to parse label on line %u", idx);
+            continue;
+        }
         if (strstr(label, "setosa"))
             dataset->labels[idx]->data[0] = 1.0;
         else if (strstr(label, "versicolor"))
