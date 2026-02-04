@@ -1,3 +1,4 @@
 *.so
 py/__pycache__/*
+*.o
 

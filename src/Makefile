@@ -1,29 +1,40 @@
 CC = gcc
-CFLAGS = -g -Wall -lrt -Wextra -Wpedantic -std=c11 \
-         -fsanitize=address,undefined \
-         -fno-omit-frame-pointer \
-         -DDEBUG
-LDFLAGS = -lm -fsanitize=address,undefined
+CFLAGS_COMMON = -Wall -Wextra -Wpedantic -std=c11 -I./include
+CFLAGS_DEBUG = $(CFLAGS_COMMON) -g -fsanitize=address,undefined \
+               -fno-omit-frame-pointer -DDEBUG
+CFLAGS_RELEASE = $(CFLAGS_COMMON) -O3 -DNDEBUG -march=native
+LDFLAGS_DEBUG = -fsanitize=address,undefined -lm -lrt
+LDFLAGS_RELEASE = -lm -lrt
 
-LIB_CFLAGS = -fPIC -O2 -I./include
-LIB_DIR = ../shared
-LIB_TARGET = $(LIB_DIR)/libmatrix.so
+SRCS = nn.c dataset.c matrix.c include/random.c
+OBJS_DEBUG = $(SRCS:.c=.debug.o)
+OBJS_RELEASE = $(SRCS:.c=.release.o)
+TARGET_DEBUG = nn_debug
+TARGET_RELEASE = nn
 
-SRC = matrix.c
-TARGET = matrix
+all: debug
 
-all: $(TARGET)
+debug: CFLAGS = $(CFLAGS_DEBUG)
+debug: LDFLAGS = $(LDFLAGS_DEBUG)
+debug: $(TARGET_DEBUG)
 
-$(TARGET): $(SRC)
-	$(CC) $(CFLAGS) -I./include -o $(TARGET) $(SRC) $(LDFLAGS)
+$(TARGET_DEBUG): $(OBJS_DEBUG)
+	$(CC) $(OBJS_DEBUG) -o $(TARGET_DEBUG) $(LDFLAGS_DEBUG)
 
-lib: $(LIB_TARGET)
+%.debug.o: %.c
+	$(CC) $(CFLAGS_DEBUG) -c $< -o $@
 
-$(LIB_TARGET): $(SRC) | $(LIB_DIR)
-	$(CC) -shared $(LIB_CFLAGS) -o $(LIB_TARGET) $(SRC)
+release: CFLAGS = $(CFLAGS_RELEASE)
+release: LDFLAGS = $(LDFLAGS_RELEASE)
+release: $(TARGET_RELEASE)
 
-$(LIB_DIR):
-	mkdir -p $(LIB_DIR)
+$(TARGET_RELEASE): $(OBJS_RELEASE)
+	$(CC) $(OBJS_RELEASE) -o $(TARGET_RELEASE) $(LDFLAGS_RELEASE)
+
+%.release.o: %.c
+	$(CC) $(CFLAGS_RELEASE) -c $< -o $@
 
 clean:
-	rm -f $(TARGET) $(LIB_TARGET)
+	rm -f $(TARGET_DEBUG) $(TARGET_RELEASE) $(OBJS_DEBUG) $(OBJS_RELEASE)
+
+.PHONY: all debug release clean

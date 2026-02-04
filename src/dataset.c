@@ -2,7 +2,6 @@
 #include "dataset.h"
 #include "include/synclog.h"
 #include "include/types.h"
-#include "matrix.h"
 #include "string.h"
 #include <stdio.h>
 static const u8 BUF_LEN = 255;

@@ -1,6 +1,45 @@
 #include "nn.h"
+#include "activations.h"
+#include "dataset.h"
+#include "include/random.h"
 #include "include/synclog.h"
 #include <stdlib.h>
+
+matrix_t *mat_sigmoid(matrix_t *m)
+{
+    if (!m)
+    {
+        LOG_DBG("Invalid matrix: %p", (void *)m);
+        return NULL;
+    }
+
+    matrix_t *res = mat_init(m->rows, m->cols);
+
+    for (u32 i = 0; i < m->rows * m->cols; i++)
+    {
+        res->data[i] = sigmoid(m->data[i]);
+    }
+
+    return res;
+}
+
+matrix_t *mat_reLU(matrix_t *m)
+{
+    if (!m)
+    {
+        LOG_DBG("Invalid matrix: %p", (void *)m);
+        return NULL;
+    }
+
+    matrix_t *res = mat_init(m->rows, m->cols);
+
+    for (u32 i = 0; i < m->rows * m->cols; i++)
+    {
+        res->data[i] = reLU(m->data[i]);
+    }
+
+    return res;
+}
 
 void network_print(const network_t *nn)
 {
@@ -98,14 +137,38 @@ void network_destroy(network_t *nn)
     free(nn);
 }
 
-void forward(network_t *nn, matrix_t *input);
+void forward(network_t *nn)
+{
+    for (u32 i = 0; i < nn->num_layers - 1; i++)
+    {
+        nn->z[i + 1] =
+            mat_add(mat_mult(nn->weights[i], nn->a[i]), nn->biases[i]);
+        nn->a[i + 1] = (i == nn->num_layers - 2) ? mat_sigmoid(nn->z[i + 1])
+                                                 : mat_reLU(nn->z[i + 1]);
+    }
+}
 void backward(network_t *nn, const matrix_t *expected);
 void update_weights(network_t *nn, const f64 LEARNING_RATE);
 
 void train(network_t *nn, matrix_t **inputs, matrix_t **labels,
            const u32 num_samples, u32 epochs, const f64 LEARNING_RATE);
+
 u32 predict(network_t *nn, const matrix_t *input);
-f64 MSE_loss(const matrix_t *predicted, const matrix_t *expected);
+
+// MSE = (1/n) Σ(predicted - expected)²
+f64 MSE_loss(const matrix_t *predicted, const matrix_t *expected)
+{
+    if (!predicted || !expected)
+    {
+        LOG_DBG("Invalid inputs: %p %p", (void *)predicted, (void *)expected);
+        return -1;
+    }
+    f64 res = 0;
+    // for (u32 i = 0; i; inc-expression) {
+    //
+    // }
+    return res;
+}
 
 int main()
 {
@@ -114,6 +177,10 @@ int main()
     const u32 NUM_LAYERS = 3;
     network_t *nn = network_create(SIZES, NUM_LAYERS);
     network_print(nn);
+    dataset_t *data = parse_file("../data/iris/bezdekIris.data");
+    dataset_print(data);
+
+    dataset_destroy(data);
     network_destroy(nn);
     return 0;
 }
