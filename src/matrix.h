@@ -25,3 +25,4 @@ matrix_t *mat_transpose(matrix_t *a);
 
 /*TODO:*/
 matrix_t *mat_inverse(matrix_t *a, matrix_t *b);
+matrix_t *mat_hadamard(matrix_t *a, matrix_t *b);

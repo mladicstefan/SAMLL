@@ -11,6 +11,9 @@ typedef struct
     matrix_t **biases;
     matrix_t **z; // pre-activation
     matrix_t **a; // post-activation
+    matrix_t **dW;
+    matrix_t **db;
+    matrix_t **delta;
 } network_t;
 
 void network_print(const network_t *nn);
@@ -21,7 +24,7 @@ void network_destroy(network_t *nn);
 
 void forward(network_t *nn);
 void backward(network_t *nn, const matrix_t *expected);
-void update_weights(network_t *nn, const f64 LEARNING_RATE);
+void update_parameters(network_t *nn, const f64 LEARNING_RATE);
 
 void train(network_t *nn, dataset_t *data, const u32 num_samples, u32 epochs,
            const f64 LEARNING_RATE);
