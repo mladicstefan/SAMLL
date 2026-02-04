@@ -1,6 +1,6 @@
 #pragma once
 #include "include/types.h"
-#include "matrix.c"
+#include "matrix.h"
 
 typedef struct
 {

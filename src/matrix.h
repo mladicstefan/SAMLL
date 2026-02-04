@@ -1,3 +1,4 @@
+#pragma once
 #include "include/random.h"
 #include "include/synclog.h"
 #include "include/types.h"
